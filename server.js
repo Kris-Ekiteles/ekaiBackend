@@ -15,6 +15,11 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error("Mongo connection error",err));
 
 // app.use('/api/about', require('./routes/about'));
+
+app.get('/', (req, res) => {
+  res.send('hello from server');
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/events', require('./routes/events'))
 app.use('/api/admin', require('./routes/adminAuth'));
