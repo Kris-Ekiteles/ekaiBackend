@@ -1,57 +1,24 @@
-//server
-require('dotenv').config();
+
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
+
+const path= require('path');
+
 const app = express();
-const port = 5000;
-const cors = require('cors')
-
-const adminAuthRoutes = require('./routes/adminAuth');
-const userRoutes = require('./routes/userRoutes');
-
-
-
-//admin
-// const adminAuthRoutes=require('./routes/adminAuth');
-const adminContentRoutes = require('./routes/adminContent');
-const { default: mongoose } = require('mongoose');
-
-//middleware
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error("Mongo connection error",err));
 
-//routes
+// app.use('/api/about', require('./routes/about'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/events', require('./routes/events'))
+app.use('/api/admin', require('./routes/adminAuth'));
 
-app.use('/api/admin', adminAuthRoutes);
-app.use('/api/about', adminContentRoutes)
-app.use('/api/users', userRoutes)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-//routes
-
-
-
-
-//frontend routes
-app.get('/', (req, res) => {
-  res.send('welcome to the home page');
-});
-app.get('/api/services', (req, res) => {
-  res.send('welcome to services page');
-});
-app.get('/api/contact', (req, res) => {
-  res.send('welcome to the contact page');
-});
-
-app.listen(port, () => {
-  console.log(`server is running on http://localhost:${port}`);
-});
-
-//mongo
-mongoose.connect(process.env.MONGO_URI, {
-  
-    useNewUrlParser: true,
-
-    useUnifiedTopology:true
-})
-.then(()=>console.log("mongo connected"))
-.catch(err=>console.error("mongo error", err));
+app.listen(5000, () => console.log('Server running on http://localhost:5000'));
