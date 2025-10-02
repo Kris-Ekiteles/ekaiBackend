@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const AboutImage = require('../models/AboutImage');
-const auth = require('../middleware/auth');
+const authenticateToken = require('../middleware/authMiddleware');
 
 router.get('/', (reg,res)=>{
   res.send('admin working')
