@@ -14,16 +14,43 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.error("Mongo connection error",err));
 
-// app.use('/api/about', require('./routes/about'));
+// Routes
+app.use('/api/about', require('./routes/about'));
+app.use('/api/events', require('./routes/events'));
+app.use('/api/admin', require('./routes/adminAuth'));
+app.use('/api/admin-content', require('./routes/adminContent'));
+app.use('/api/memories', require('./routes/memories'));
+app.use('/api/users', require('./routes/userRoutes'));
 
-app.get('/', (req, res) => {
-  res.send('hello from server');
+// Static file serving
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/api/events', require('./routes/events'))
-app.use('/api/admin', require('./routes/adminAuth'));
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'EKAI Backend API', 
+    version: '1.0.0',
+    endpoints: {
+      about: '/api/about',
+      events: '/api/events', 
+      admin: '/api/admin',
+      adminContent: '/api/admin-content',
+      memories: '/api/memories',
+      users: '/api/users',
+      uploads: '/uploads',
+      health: '/health'
+    }
+  });
+});
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.listen(5000, () => console.log('Server running on http://localhost:5000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
