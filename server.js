@@ -23,6 +23,8 @@ app.use('/api/admin', require('./routes/adminAuth'));
 app.use('/api/admin-content', require('./routes/adminContent'));
 app.use('/api/memories', require('./routes/memories'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/plan', require('./routes/plan'));
+app.use('/api/contact', require('./routes/contact'));
 
 // Static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
