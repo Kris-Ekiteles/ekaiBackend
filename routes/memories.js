@@ -3,11 +3,16 @@ const router = express.Router();
 const Memory = require('../models/Memory');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
+const { makeAbsoluteUrl } = require('../utils/url');
 
 // GET all memories
 router.get('/', async (req, res) => {
   const items = await Memory.find().sort({ createdAt: -1 });
-  res.json(items);
+  const withAbsoluteUrls = items.map(m => ({
+    ...m.toObject(),
+    imageUrl: makeAbsoluteUrl(req, m.imageUrl)
+  }));
+  res.json(withAbsoluteUrls);
 });
 
 // POST memory (support file or URL)
@@ -26,7 +31,8 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
   const memory = new Memory({ imageUrl: finalImageUrl });
   await memory.save();
-  res.status(201).json(memory);
+  const response = { ...memory.toObject(), imageUrl: makeAbsoluteUrl(req, memory.imageUrl) };
+  res.status(201).json(response);
 });
 
 // DELETE

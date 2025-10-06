@@ -3,12 +3,17 @@ const router = express.Router();
 const Event = require('../models/Event');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload'); // multer config
+const { makeAbsoluteUrl } = require('../utils/url');
 
 // 📌 GET all events (public)
 router.get('/', async (req, res) => {
   try {
     const events = await Event.find().sort({ createdAt: -1 });
-    res.json(events);
+    const withAbsoluteUrls = events.map(e => ({
+      ...e.toObject(),
+      imageUrl: makeAbsoluteUrl(req, e.imageUrl)
+    }));
+    res.json(withAbsoluteUrls);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching events' });
   }
@@ -31,7 +36,8 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
     const event = new Event({ imageUrl: finalImageUrl, name, price });
     await event.save();
-    res.status(201).json(event);
+    const response = { ...event.toObject(), imageUrl: makeAbsoluteUrl(req, event.imageUrl) };
+    res.status(201).json(response);
   } catch (err) {
     res.status(500).json({ message: 'Error creating event' });
   }
@@ -42,7 +48,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const updated = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ message: 'Event not found' });
-    res.json(updated);
+    if (!updated) return res.status(404).json({ message: 'Event not found' });
+    const response = { ...updated.toObject(), imageUrl: makeAbsoluteUrl(req, updated.imageUrl) };
+    res.json(response);
   } catch (err) {
     res.status(500).json({ message: 'Error updating event' });
   }

@@ -7,6 +7,8 @@ require('dotenv').config();
 const path= require('path');
 
 const app = express();
+// Ensure correct protocol (https) is detected behind reverse proxies/CDNs
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 
