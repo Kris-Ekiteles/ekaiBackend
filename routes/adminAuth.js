@@ -19,7 +19,7 @@ router.post('/register', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
-
+// const hashedPassword = await bcrypt.hash(password, 10)
     const user = new User({ username, password });
     await user.save();
 
@@ -32,27 +32,56 @@ router.post('/register', async (req, res) => {
 
 // ✅ 2. Login Route
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
 
-  try {
-    const user = await User.findOne({ username });
-    if (!user) return res.status(401).json({ message: 'User not found' });
+  
+    const { username, password } = req.body;
+  
+    try {
+      console.log("Login attempt:", username);
+  
+      const user = await User.findOne({ username });
+      console.log("Found user:", user);
+  
+      if (!user) return res.status(401).json({ message: 'User not found' });
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      console.log("Password match:", isMatch);
+  
+      if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
+  
+      const token = jwt.sign(
+        { id: user._id, username: user.username },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+  
+      res.status(200).json({ token });
+    } catch (err) {
+      console.error("Login error:", err);
+      res.status(500).json({ message: 'Server error during login', error: err.message });
+    }
+  });
+//   const { username, password } = req.body;
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
+//   try {
+//     const user = await User.findOne({ username });
+//     if (!user) return res.status(401).json({ message: 'User not found' });
 
-    const token = jwt.sign(
-      { id: user._id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
 
-    res.status(200).json({ token });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error during login' });
-  }
-});
+//     const token = jwt.sign(
+//       { id: user._id, username: user.username },
+//       JWT_SECRET,
+//       { expiresIn: '1h' }
+//     );
+
+//     res.status(200).json({ token });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Server error during login' });
+//   }
+// });
 
 // ✅ 3. Protected Admin Route
 router.get('/admin', authenticateToken, (req, res) => {
