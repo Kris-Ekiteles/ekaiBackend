@@ -18,6 +18,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Error fetching events' });
   }
 });
+//admin post
 
 // 📌 POST event (admin only, file upload or URL)
 router.post('/', authenticateToken, upload.single('image'), async (req, res) => {
