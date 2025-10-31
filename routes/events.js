@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 const authenticateToken = require('../middleware/authMiddleware');
-const upload = require('../middleware/upload'); // multer config
+const upload = require('../config/multer'); // multer config
 const { makeAbsoluteUrl } = require('../utils/url');
 
 // 📌 GET all events (public)
@@ -28,7 +28,7 @@ router.post('/', authenticateToken, upload.single('image'), async (req, res) => 
 
     // If a file is uploaded, override with server path
     if (req.file) {
-      finalImageUrl = `/uploads/${req.file.filename}`;
+      finalImageUrl = req.file.path;
     }
 
     if (!finalImageUrl || !name || !price) {

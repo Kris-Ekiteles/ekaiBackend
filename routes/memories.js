@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Memory = require('../models/Memory');
 const authenticateToken = require('../middleware/authMiddleware');
-const upload = require('../middleware/upload');
+const upload = require('../middleware/upload_local');
 const { makeAbsoluteUrl } = require('../utils/url');
 
 // GET all memories
